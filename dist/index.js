@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 
-var pdfKit = require('pdfkit');
-var moment = require('moment');
-var numeral = require('numeral');
-var i18n = require('./i18n');
+var pdfKit = require("pdfkit");
+var moment = require("moment");
+var numeral = require("numeral");
+var i18n = require("i18n.js");
 
 var TEXT_SIZE = 8;
 var CONTENT_LEFT_PADDING = 50;
@@ -15,14 +15,14 @@ function PDFInvoice(_ref) {
 
   var date = new Date();
   var charge = {
-    createdAt: date.getDay() + '/' + date.getMonth() + '/' + date.getFullYear(),
-    amount: items.reduce(function (acc, item) {
+    createdAt: date.getDay() + "/" + date.getMonth() + "/" + date.getFullYear(),
+    amount: items.reduce(function(acc, item) {
       return acc + item.amount;
     }, 0)
   };
-  var doc = new pdfKit({ size: 'A4', margin: 50 });
+  var doc = new pdfKit({ size: "A4", margin: 50 });
 
-  doc.fillColor('#333333');
+  doc.fillColor("#333333");
 
   var translate = i18n[PDFInvoice.lang];
   moment.locale(PDFInvoice.lang);
@@ -40,14 +40,21 @@ function PDFInvoice(_ref) {
 
       var borderOffset = doc.currentLineHeight() + 70;
 
-      doc.fontSize(16).fillColor('#cccccc').text(moment().format('MMMM, DD, YYYY'), CONTENT_LEFT_PADDING, 50, {
-        align: 'right'
-      }).fillColor('#333333');
+      doc
+        .fontSize(16)
+        .fillColor("#cccccc")
+        .text(moment().format("MMMM, DD, YYYY"), CONTENT_LEFT_PADDING, 50, {
+          align: "right"
+        })
+        .fillColor("#333333");
 
-      doc.strokeColor('#cccccc').moveTo(CONTENT_LEFT_PADDING, borderOffset).lineTo(divMaxWidth, borderOffset);
+      doc
+        .strokeColor("#cccccc")
+        .moveTo(CONTENT_LEFT_PADDING, borderOffset)
+        .lineTo(divMaxWidth, borderOffset);
     },
     genFooter: function genFooter() {
-      doc.fillColor('#cccccc');
+      doc.fillColor("#cccccc");
 
       doc.fontSize(12).text(company.name, CONTENT_LEFT_PADDING, 450);
 
@@ -55,32 +62,50 @@ function PDFInvoice(_ref) {
       doc.text(company.phone);
       doc.text(company.email);
 
-      doc.fillColor('#333333');
+      doc.fillColor("#333333");
     },
     genCustomerInfos: function genCustomerInfos() {
-      doc.fontSize(TEXT_SIZE).text(translate.chargeFor, CONTENT_LEFT_PADDING, 400);
+      doc
+        .fontSize(TEXT_SIZE)
+        .text(translate.chargeFor, CONTENT_LEFT_PADDING, 400);
 
-      doc.text(customer.name + ' <' + customer.email + '>');
+      doc.text(customer.name + " <" + customer.email + ">");
     },
     genTableHeaders: function genTableHeaders() {
-      ['amount', 'name', 'description', 'quantity'].forEach(function (text, i) {
-        doc.fontSize(TEXT_SIZE).text(translate[text], table.x + i * table.inc, table.y);
+      ["amount", "name", "description", "quantity"].forEach(function(text, i) {
+        doc
+          .fontSize(TEXT_SIZE)
+          .text(translate[text], table.x + i * table.inc, table.y);
       });
     },
     genTableRow: function genTableRow() {
-      items.map(function (item) {
-        return Object.assign({}, item, {
-          amount: numeral(item.amount).format('$ 0,00.00')
+      items
+        .map(function(item) {
+          return Object.assign({}, item, {
+            amount: numeral(item.amount).format("$ 0,00.00")
+          });
+        })
+        .forEach(function(item, itemIndex) {
+          ["amount", "name", "description", "quantity"].forEach(function(
+            field,
+            i
+          ) {
+            doc
+              .fontSize(TEXT_SIZE)
+              .text(
+                item[field],
+                table.x + i * table.inc,
+                table.y + TEXT_SIZE + 6 + itemIndex * 20
+              );
+          });
         });
-      }).forEach(function (item, itemIndex) {
-        ['amount', 'name', 'description', 'quantity'].forEach(function (field, i) {
-          doc.fontSize(TEXT_SIZE).text(item[field], table.x + i * table.inc, table.y + TEXT_SIZE + 6 + itemIndex * 20);
-        });
-      });
     },
     genTableLines: function genTableLines() {
       var offset = doc.currentLineHeight() + 2;
-      doc.moveTo(table.x, table.y + offset).lineTo(divMaxWidth, table.y + offset).stroke();
+      doc
+        .moveTo(table.x, table.y + offset)
+        .lineTo(divMaxWidth, table.y + offset)
+        .stroke();
     },
     generate: function generate() {
       this.genHeader();
@@ -93,13 +118,12 @@ function PDFInvoice(_ref) {
       doc.end();
     },
 
-
     get pdfkitDoc() {
       return doc;
     }
   };
 }
 
-PDFInvoice.lang = 'pt_BR';
+PDFInvoice.lang = "en_US";
 
 module.exports = PDFInvoice;
